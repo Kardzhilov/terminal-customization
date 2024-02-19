@@ -28,3 +28,10 @@ git clone https://github.com/Kardzhilov/terminal-customization.git
 - [ ] Modify windows terminal colour json file to match the Gruvbox theme `theme/windows-terminal-colours.json`
 - [ ] Look for Gruvbox theme plugins for Visual Studio Code.
 - [ ] Look for Gruvbox theme plugins for IntelliJ IDEA.
+
+## To-Do
+
+- Add and handle `ccat` – Colorize Cat and `cless` - Colorize Less
+    - Install go language
+    - Replace cat with ccat? and same command for less
+

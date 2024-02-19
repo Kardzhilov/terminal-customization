@@ -34,33 +34,58 @@ if ! grep -q 'bindkey "\^\[\[1;5C" forward-word' ~/.zshrc || ! grep -q 'bindkey 
     echo 'bindkey "^[[1;5D" backward-word' >> ~/.zshrc  # Ctrl + Left Arrow
 fi
 
+clear_alias_block() {
+    local block_start="# <>< git managed aliases start ><>"
+    local block_end="# <>< git managed aliases end ><>"
+
+    if grep -q "$block_start" ~/.zshrc; then
+        # Remove existing block
+        sed -i "/$block_start/,/$block_end/d" ~/.zshrc
+    fi
+}
+
+############### Add Aliases to .zshrc ###############
 # Function to add aliases block to .zshrc
 add_alias_block() {
     local block_start="# <>< git managed aliases start ><>"
     local block_end="# <>< git managed aliases end ><>"
+    local file_contents=$(cat "$1")
+    touch ~/.zshrc_temp
 
     # Check if block already exists
-    if ! grep -q "$block_start" ~/.zshrc; then
-        # Add aliases block to .zshrc
-        echo "${YELLOW}Adding aliases to .zshrc...${NC}"
-        echo "$block_start" >> ~/.zshrc
-        cat "$1" >> ~/.zshrc
-        echo "$block_end" >> ~/.zshrc
+    if grep -q "$block_start" ~/.zshrc; then
+        # Preserve existing aliases block
+        sed -n "/$block_start/,/$block_end/{/$block_start/b; /$block_end/b; p}" ~/.zshrc >> ~/.zshrc_temp
+        sed -i "/$block_start/,/$block_end/d" ~/.zshrc
     fi
+
+    # Add aliases block to .zshrc
+    echo "${YELLOW}Adding aliases to .zshrc...${NC}"
+    echo "$block_start" >> ~/.zshrc
+    # Add preserved aliases block back
+    cat ~/.zshrc_temp >> ~/.zshrc
+    echo "$file_contents" >> ~/.zshrc
+    echo "$block_end" >> ~/.zshrc
+    rm -f ~/.zshrc_temp
 }
 
 # Prompt the user for choice and add aliases based on the choice
 read -p "${CYAN}Do you want full aliases or just basic aliases? (full/basic): ${NC}" choice
 if [ "$choice" = "full" ]; then
+    clear_alias_block
     add_alias_block "alias/general"
     add_alias_block "alias/tools"
-elif [ "$choice" != "basic" ]; then
+elif [ "$choice" = "basic" ]; then
+    clear_alias_block
+    add_alias_block "alias/general"
+else
     echo "${RED}Invalid choice. Exiting.${NC}"
     exit 1
 fi
 
 echo "${GREEN}Zsh installed and aliases added to .zshrc.${NC}"
 
+############### add plugins to .zshrc ###############
 # Directory to clone the repositories
 plugins_dir="$HOME/.zsh-plugins"
 mkdir -p "$plugins_dir"
@@ -119,6 +144,8 @@ install_zsh_autosuggestions
 install_zsh_syntax_highlighting
 
 echo "${GREEN}Plugins added to .zshrc.${NC}"
+
+############### Install Starship Prompt ###############
 
 # Install Starship if not already installed
 if ! command -v starship &>/dev/null; then
