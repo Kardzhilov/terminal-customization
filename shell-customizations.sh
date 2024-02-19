@@ -28,7 +28,7 @@ if [ ! -f ~/.zshrc ]; then
 fi
 
 # Add key bindings to .zshrc if not already present
-if ! grep -q "bindkey \"^[[1;5C\" forward-word" ~/.zshrc; then
+if ! grep -q 'bindkey "\^\[\[1;5C" forward-word' ~/.zshrc || ! grep -q 'bindkey "\^\[\[1;5D" backward-word' ~/.zshrc; then
     echo "${YELLOW}Adding key bindings to .zshrc...${NC}"
     echo 'bindkey "^[[1;5C" forward-word' >> ~/.zshrc  # Ctrl + Right Arrow
     echo 'bindkey "^[[1;5D" backward-word' >> ~/.zshrc  # Ctrl + Left Arrow
