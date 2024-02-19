@@ -21,3 +21,10 @@ git clone https://github.com/Kardzhilov/terminal-customization.git
 
 ./terminal-customization/shell-customizations.sh
 ```
+## Checklist
+
+- [ ] Review and run `shell-customizations.sh` script.
+- [ ] Check if the terminal appearance and functionality seems right.
+- [ ] Modify windows terminal colour json file to match the Gruvbox theme `theme/windows-terminal-colours.json`
+- [ ] Look for Gruvbox theme plugins for Visual Studio Code.
+- [ ] Look for Gruvbox theme plugins for IntelliJ IDEA.

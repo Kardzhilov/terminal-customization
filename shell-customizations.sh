@@ -27,6 +27,13 @@ if [ ! -f ~/.zshrc ]; then
     touch ~/.zshrc
 fi
 
+# Add key bindings to .zshrc if not already present
+if ! grep -q "bindkey \"^[[1;5C\" forward-word" ~/.zshrc; then
+    echo "${YELLOW}Adding key bindings to .zshrc...${NC}"
+    echo 'bindkey "^[[1;5C" forward-word' >> ~/.zshrc  # Ctrl + Right Arrow
+    echo 'bindkey "^[[1;5D" backward-word' >> ~/.zshrc  # Ctrl + Left Arrow
+fi
+
 # Function to add aliases block to .zshrc
 add_alias_block() {
     local block_start="# <>< git managed aliases start ><>"
@@ -125,6 +132,7 @@ if ! grep -q "eval \"\$(starship init zsh)\"" ~/.zshrc; then
     echo 'eval "$(starship init zsh)"' >> ~/.zshrc
 fi
 
+mkdir -p ~/.config/
 # Run starship preset if configuration file doesn't exist
 if [ ! -f ~/.config/starship.toml ]; then
     echo "${YELLOW}Running Starship preset...${NC}"
@@ -144,7 +152,7 @@ time_section_disabled() {
 # Edit ~/.config/starship.toml to disable time module if not already disabled
 if ! time_section_disabled ~/.config/starship.toml; then
     echo "${YELLOW}Disabling time module in Starship configuration...${NC}"
-    sed -i 's/\[time\]/\[time\]\ndisabled = true/g' ~/.config/starship.toml
+    sed -i '/^\[time\]/,/^\[/ s/^disabled = false/disabled = true/' ~/.config/starship.toml
 fi
 
 echo "${GREEN}Starship installation and configuration completed.${NC}"
