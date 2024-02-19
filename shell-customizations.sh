@@ -14,11 +14,12 @@ BRIGHT_RED=$(tput setaf 9)
 BRIGHT_GREEN=$(tput setaf 10)
 NC=$(tput sgr0) # No Color
 
-# Install Zsh if not installed
-if ! command -v zsh &>/dev/null; then
-    echo "${YELLOW}Installing Zsh...${NC}"
+# Install apt packages if not installed
+if ! command -v zsh &>/dev/null || ! command -v batman &>/dev/null; then
+    echo "${YELLOW}Installing apt packages...${NC}"
     sudo apt-get update
     sudo apt-get install -y zsh
+    sudo apt-get install -y bat
 fi
 
 # Create .zshrc if not exists
