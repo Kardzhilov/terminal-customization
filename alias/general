@@ -7,3 +7,9 @@ alias ls='ls --color=tty'
 alias lsa='ls -lah'
 alias pullall='find . -mindepth 1 -maxdepth 1 -type d -print -exec git -C {} pull \;'
 alias resettime='sudo hwclock -s'
+alias -='cd -'
+alias ..='cd ..'
+alias ...=../..
+alias ....=../../..
+alias .....=../../../..
+alias ......=../../../../..
