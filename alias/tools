@@ -1,3 +1,4 @@
 alias arc='~/.local/arcanist/bin/arc'
-alias intellij='snap run intellij-idea-ultimate >/dev/null 2>&1 &'
-alias intellijHere='snap run intellij-idea-ultimate . >/dev/null 2>&1 &'
+alias ij='snap run intellij-idea-ultimate >/dev/null 2>&1 &'
+alias ijh='snap run intellij-idea-ultimate . >/dev/null 2>&1 &'
+alias cod='code .'
