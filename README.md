@@ -26,12 +26,10 @@ git clone https://github.com/Kardzhilov/terminal-customization.git
 - [ ] Review and run `shell-customizations.sh` script.
 - [ ] Check if the terminal appearance and functionality seems right.
 - [ ] Modify windows terminal colour json file to match the Gruvbox theme `theme/windows-terminal-colours.json`
+- [ ] Install the fonts in the `fonts` directory. And set the terminal font to one of the installed fonts.
 - [ ] Look for Gruvbox theme plugins for Visual Studio Code.
 - [ ] Look for Gruvbox theme plugins for IntelliJ IDEA.
 
 ## To-Do
-
-- Add and handle `ccat` – Colorize Cat and `cless` - Colorize Less
-    - Install go language
-    - Replace cat with ccat? and same command for less
-
+- Add support for other package managers (e.g. `yum`, `dnf`, etc.)
+- Add more tools to the tools list.

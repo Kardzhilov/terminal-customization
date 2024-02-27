@@ -1,25 +1,14 @@
 #!/bin/bash
 
-# Define text color variables
-BLACK=$(tput setaf 0)
-RED=$(tput setaf 1)
-GREEN=$(tput setaf 2)
-YELLOW=$(tput setaf 3)
-BLUE=$(tput setaf 4)
-MAGENTA=$(tput setaf 5)
-CYAN=$(tput setaf 6)
-WHITE=$(tput setaf 7)
-BRIGHT_BLACK=$(tput setaf 8)
-BRIGHT_RED=$(tput setaf 9)
-BRIGHT_GREEN=$(tput setaf 10)
-NC=$(tput sgr0) # No Color
+# Source the colors file
+source ./scripts/colours.sh
 
-# Install apt packages if not installed
-if ! command -v zsh &>/dev/null || ! command -v batman &>/dev/null; then
-    echo "${YELLOW}Installing apt packages...${NC}"
-    sudo apt-get update
+echo "${GREEN}Starting ZSH setup${NC}"
+
+# Install zsh if not installed
+if ! command -v zsh &>/dev/null; then
+    echo "${YELLOW}Installing zsh...${NC}"
     sudo apt-get install -y zsh
-    sudo apt-get install -y bat
 fi
 
 # Create .zshrc if not exists
@@ -145,45 +134,6 @@ install_zsh_autosuggestions
 install_zsh_syntax_highlighting
 
 echo "${GREEN}Plugins added to .zshrc.${NC}"
-
-############### Install Starship Prompt ###############
-
-# Install Starship if not already installed
-if ! command -v starship &>/dev/null; then
-    echo "${YELLOW}Installing Starship...${NC}"
-    curl -sS https://starship.rs/install.sh | sh
-fi
-
-# Add Starship initialization to .zshrc if not already present
-if ! grep -q "eval \"\$(starship init zsh)\"" ~/.zshrc; then
-    echo "${YELLOW}Adding Starship initialization to .zshrc...${NC}"
-    echo 'eval "$(starship init zsh)"' >> ~/.zshrc
-fi
-
-mkdir -p ~/.config/
-# Run starship preset if configuration file doesn't exist
-if [ ! -f ~/.config/starship.toml ]; then
-    echo "${YELLOW}Running Starship preset...${NC}"
-    starship preset gruvbox-rainbow -o ~/.config/starship.toml
-fi
-
-# Function to check if the [time] section is present and disabled in the starship.toml file
-time_section_disabled() {
-    # Check if the [time] section exists and is disabled
-    if grep -q "\[time\]" "$1" && grep -q "disabled = true" "$1"; then
-        return 0
-    else
-        return 1
-    fi
-}
-
-# Edit ~/.config/starship.toml to disable time module if not already disabled
-if ! time_section_disabled ~/.config/starship.toml; then
-    echo "${YELLOW}Disabling time module in Starship configuration...${NC}"
-    sed -i '/^\[time\]/,/^\[/ s/^disabled = false/disabled = true/' ~/.config/starship.toml
-fi
-
-echo "${GREEN}Starship installation and configuration completed.${NC}"
 
 # Set Zsh as the default shell
 echo "${CYAN}Setting Zsh as the default shell...${NC}"
