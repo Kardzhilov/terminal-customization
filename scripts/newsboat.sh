@@ -27,6 +27,7 @@ fi
 # Add content to ~/.newsboat/config if not already present
 if [ ! -f ~/.newsboat/config ]; then
     cat <<EOF > ~/.newsboat/config
+datetime-format "%m.%d %H:%M"
 bind-key RIGHT open
 bind-key LEFT quit
 auto-reload yes

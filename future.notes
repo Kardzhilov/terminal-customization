@@ -1,0 +1,24 @@
+tools to consider
+- https://github.com/denisidoro/navi
+  - interactive cheatsheet tool
+- browsr https://github.com/juftin/browsr
+  - a terminal file browser
+      sudo apt install pipx
+      pipx ensurepath
+      pipx install "browsr[all]"
+  - slight issue atm is that it duplicates top and bottom line when scrolling
+- https://www.reddit.com/r/commandline/comments/u7i21p/sampler_a_highly_configurable_dashboard_in_your/
+
+
+More chill stuff
+https://www.reddit.com/r/commandline/comments/130mqn5/coderadiocli_a_cli_client_for_freecodecamps_code/
+radio/music is fun. Have not tested it yet
+
+https://github.com/max-niederman/ttyper
+typing test
+
+https://github.com/gokcehan/lf
+file manager
+
+https://gitlab.com/christosangel/ascii-matrix
+matrix visuals in terminal

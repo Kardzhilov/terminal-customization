@@ -3,6 +3,11 @@
 # Source the colors file
 source ./scripts/colours.sh
 
+# Function to handle errors and exit, otherwise the script would continue running even if there is an exit 1
+exit_with_error() {
+    echo "${RED}Something went wrong.${NC} Exiting..."
+    exit 1
+}
 
 read -p "Would you like to customize your ${GREEN}Terminal${NC}? (Y/N): " choice
 
@@ -16,21 +21,21 @@ elif [ "$choice" == "N" ]; then
     echo "${GREEN}Have a nice day${NC}"
     exit 0
 else
-    exit 1
+    exit_with_error
 fi
 
 # Update the apt package list before installing new packages
 sudo apt-get update
 
-./scripts/zsh.sh
-echo "" # Add a for legibility
-./scripts/starship.sh
+./scripts/zsh.sh || exit_with_error
+echo "" # Add a new line for legibility
+./scripts/starship.sh || exit_with_error
 echo ""
-./scripts/tools.sh
+./scripts/tools.sh || exit_with_error
 echo ""
-./scripts/newsboat.sh
+./scripts/newsboat.sh || exit_with_error
 echo ""
-./scripts/rainbow.sh "Customization Complete"
+./scripts/rainbow.sh "Customization Complete" || exit_with_error
 
 echo "${YELLOW}Remember to go over the checklist in the README.md file${NC}"
 echo "${GREEN}Please restart your terminal to see the changes.${NC}"
