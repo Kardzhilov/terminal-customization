@@ -17,6 +17,27 @@ if [ ! -f ~/.zshrc ]; then
     touch ~/.zshrc
 fi
 
+# Install Oh My Zsh if not installed
+if [ ! -d "$HOME/.oh-my-zsh" ]; then
+    echo "${YELLOW}Installing Oh My Zsh...${NC}"
+    curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh | sh -s -- --unattended
+fi
+
+# Empty .zshrc file if "# <><" is not found
+if ! grep -q "# <><" ~/.zshrc; then
+    echo "${YELLOW}Emptying .zshrc file...${NC}"
+    > ~/.zshrc
+fi
+
+# Add export ZSH="$HOME/.oh-my-zsh" to the start of .zshrc if not already present
+if ! grep -Fxq 'export ZSH="$HOME/.oh-my-zsh"' ~/.zshrc; then
+    echo "${YELLOW}Adding export ZSH=\"$HOME/.oh-my-zsh\" to .zshrc...${NC}"
+    echo 'export ZSH="$HOME/.oh-my-zsh"' > ~/.zshrc_temp
+    echo "" >> ~/.zshrc_temp
+    cat ~/.zshrc >> ~/.zshrc_temp
+    mv ~/.zshrc_temp ~/.zshrc
+fi
+
 # Add key bindings to .zshrc if not already present
 if ! grep -q 'bindkey "\^\[\[1;5C" forward-word' ~/.zshrc || ! grep -q 'bindkey "\^\[\[1;5D" backward-word' ~/.zshrc; then
     echo "${YELLOW}Adding key bindings to .zshrc...${NC}"
@@ -77,7 +98,7 @@ echo "${GREEN}Zsh installed and aliases added to .zshrc.${NC}"
 
 ############### add plugins to .zshrc ###############
 # Directory to clone the repositories
-plugins_dir="$HOME/.zsh-plugins"
+plugins_dir="$HOME/.oh-my-zsh/custom/plugins"
 mkdir -p "$plugins_dir"
 
 # Function to add plugins block to .zshrc
@@ -93,6 +114,7 @@ add_plugins() {
         echo 'plugins=(' >> ~/.zshrc
         echo '  zsh-autosuggestions' >> ~/.zshrc
         echo '  zsh-syntax-highlighting' >> ~/.zshrc
+        echo '  git' >> ~/.zshrc
         echo ')' >> ~/.zshrc
         echo "$plugins_end" >> ~/.zshrc
     fi
@@ -104,10 +126,6 @@ install_zsh_autosuggestions() {
     if [ ! -d "$autosuggestions_dir" ]; then
         echo "${YELLOW}Installing zsh-autosuggestions...${NC}"
         git clone https://github.com/zsh-users/zsh-autosuggestions "$autosuggestions_dir"
-        # Add sourcing to .zshrc
-        if ! grep -q "source $autosuggestions_dir/zsh-autosuggestions.zsh" ~/.zshrc; then
-            echo "source $autosuggestions_dir/zsh-autosuggestions.zsh" >> ~/.zshrc
-        fi
     fi
 }
 
@@ -117,10 +135,6 @@ install_zsh_syntax_highlighting() {
     if [ ! -d "$syntax_highlighting_dir" ]; then
         echo "${YELLOW}Installing zsh-syntax-highlighting...${NC}"
         git clone https://github.com/zsh-users/zsh-syntax-highlighting.git "$syntax_highlighting_dir"
-        # Add sourcing to .zshrc
-        if ! grep -q "source $syntax_highlighting_dir/zsh-syntax-highlighting.zsh" ~/.zshrc; then
-            echo "source $syntax_highlighting_dir/zsh-syntax-highlighting.zsh" >> ~/.zshrc
-        fi
     fi
 }
 
@@ -134,6 +148,12 @@ install_zsh_autosuggestions
 install_zsh_syntax_highlighting
 
 echo "${GREEN}Plugins added to .zshrc.${NC}"
+
+# Add source $ZSH/oh-my-zsh.sh to.zshrc (needs to be after plugins)
+if ! grep -Fxq 'source $ZSH/oh-my-zsh.sh' ~/.zshrc; then
+    echo "${YELLOW}Adding source \$ZSH/oh-my-zsh.sh to .zshrc...${NC}"
+    echo 'source $ZSH/oh-my-zsh.sh' >> ~/.zshrc
+fi
 
 # Set Zsh as the default shell
 echo "${CYAN}Setting Zsh as the default shell...${NC}"

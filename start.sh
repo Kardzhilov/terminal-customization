@@ -38,4 +38,9 @@ echo ""
 ./scripts/rainbow.sh "Customization Complete" || exit_with_error
 
 echo "${YELLOW}Remember to go over the checklist in the README.md file${NC}"
-echo "${GREEN}Please restart your terminal to see the changes.${NC}"
+echo "${CYAN}You should probably restart your terminal now to avoid bugs${NC}"
+
+# Start zsh if it is installed
+if command -v zsh &>/dev/null; then
+    exec zsh -l
+fi
