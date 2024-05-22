@@ -57,7 +57,6 @@ https://www.aljazeera.com/xml/rss/all.xml "~Al-Jazeera"
 http://feeds.bbci.co.uk/news/world/rss.xml "~BBC World News"
 https://www.theguardian.com/international/rss "~The Guardian"
 http://rss.nytimes.com/services/xml/rss/nyt/World.xml "~The New York Times"
-http://rss.cnn.com/rss/edition_world.rss "~CNN World"
 http://feeds.washingtonpost.com/rss/world "~The Washington Post"
 EOF
 fi
