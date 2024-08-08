@@ -53,11 +53,11 @@ fi
 if [ ! -f ~/.newsboat/urls ]; then
     cat <<EOF > ~/.newsboat/urls
 https://www.nrk.no/nyheter/siste.rss "~NRK"
-https://www.aljazeera.com/xml/rss/all.xml "~Al-Jazeera"
-http://feeds.bbci.co.uk/news/world/rss.xml "~BBC World News"
-https://www.theguardian.com/international/rss "~The Guardian"
-http://rss.nytimes.com/services/xml/rss/nyt/World.xml "~The New York Times"
-http://feeds.washingtonpost.com/rss/world "~The Washington Post"
+#https://www.aljazeera.com/xml/rss/all.xml "~Al-Jazeera"
+#http://feeds.bbci.co.uk/news/world/rss.xml "~BBC World News"
+#https://www.theguardian.com/international/rss "~The Guardian"
+#http://rss.nytimes.com/services/xml/rss/nyt/World.xml "~The New York Times"
+#http://feeds.washingtonpost.com/rss/world "~The Washington Post"
 EOF
 fi
 
