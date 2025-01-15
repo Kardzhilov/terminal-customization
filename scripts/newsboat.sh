@@ -18,10 +18,16 @@ else
     exit 1
 fi
 
-# Install Newsboat if not already installed
+# Check if Homebrew is installed
+if ! command -v brew &> /dev/null; then
+    echo "${RED}Homebrew is not installed. Newsboat cannot be installed.${NC}"
+    exit 1
+fi
+
+# Install Newsboat using Homebrew if not already installed
 if ! command -v newsboat &> /dev/null; then
-    sudo apt-get install newsboat -y
-    mkdir ~/.newsboat
+    brew install newsboat || exit 1
+    mkdir -p ~/.newsboat
 fi
 
 # Add content to ~/.newsboat/config if not already present

@@ -33,6 +33,23 @@ echo "" # Add a new line for legibility
 echo ""
 ./scripts/tools.sh || exit_with_error
 echo ""
+
+# Ask if Homebrew should be installed
+read -p "Would you like to install ${MAGENTA}Homebrew${NC}? (Y/N): " brew_choice
+
+# Convert the choice to uppercase
+brew_choice=$(echo "$brew_choice" | tr '[:lower:]' '[:upper:]')
+
+# Check the user's choice
+if [ "$brew_choice" == "Y" ]; then
+    echo "${GREEN}Installing Homebrew...${NC}"
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" || exit_with_error
+elif [ "$brew_choice" == "N" ]; then
+    echo "${GREEN}Skipping Homebrew installation${NC}"
+else
+    exit_with_error
+fi
+
 ./scripts/newsboat.sh || exit_with_error
 echo ""
 ./scripts/rainbow.sh "Customization Complete" || exit_with_error
