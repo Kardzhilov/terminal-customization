@@ -33,6 +33,8 @@ echo "" # Add a new line for legibility
 echo ""
 ./scripts/tools.sh || exit_with_error
 echo ""
+./scripts/git.sh || exit_with_error
+echo ""
 
 # Ask if Homebrew should be installed
 read -p "Would you like to install ${MAGENTA}Homebrew${NC}? (Y/N): " brew_choice
@@ -42,8 +44,14 @@ brew_choice=$(echo "$brew_choice" | tr '[:lower:]' '[:upper:]')
 
 # Check the user's choice
 if [ "$brew_choice" == "Y" ]; then
-    echo "${GREEN}Installing Homebrew...${NC}"
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" || exit_with_error
+    # Check if running on ARM processor
+    if [ "$(uname -p)" = "aarch64" ] || [ "$(uname -p)" = "arm64" ]; then
+        echo "${YELLOW}ARM processor detected. Homebrew is not supported on ARM architecture.${NC}"
+        echo "${GREEN}Skipping Homebrew installation${NC}"
+    else
+        echo "${GREEN}Installing Homebrew...${NC}"
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" || exit_with_error
+    fi
 elif [ "$brew_choice" == "N" ]; then
     echo "${GREEN}Skipping Homebrew installation${NC}"
 else
