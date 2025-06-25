@@ -1,7 +1,3 @@
-alias arc='~/.local/arcanist/bin/arc'
-alias ij='snap run intellij-idea-ultimate >/dev/null 2>&1 &'
-alias ijh='snap run intellij-idea-ultimate . >/dev/null 2>&1 &'
-alias cod='code .'
 alias c='batcat -n'
 alias ca='batcat -n --paging=never'
 alias cprint='batcat -p --paging=never'
