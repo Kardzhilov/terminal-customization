@@ -9,7 +9,15 @@ exit_with_error() {
     exit 1
 }
 
-read -p "Would you like to customize your ${GREEN}Terminal${NC}? (Y/N): " choice
+# Check for server flag
+SERVER_MODE=false
+if [ "$1" == "server" ]; then
+    SERVER_MODE=true
+    echo "${GREEN}Running in server mode - minimal setup${NC}"
+    choice="Y"
+else
+    read -p "Would you like to customize your ${GREEN}Terminal${NC}? (Y/N): " choice
+fi
 
 # Convert the choice to uppercase
 choice=$(echo "$choice" | tr '[:lower:]' '[:upper:]')
@@ -31,36 +39,43 @@ sudo apt-get update
 echo "" # Add a new line for legibility
 ./scripts/starship.sh || exit_with_error
 echo ""
-./scripts/tools.sh || exit_with_error
-echo ""
-./scripts/git.sh || exit_with_error
-echo ""
 
-# Ask if Homebrew should be installed
-read -p "Would you like to install ${MAGENTA}Homebrew${NC}? (Y/N): " brew_choice
+if [ "$SERVER_MODE" = false ]; then
+    ./scripts/tools.sh || exit_with_error
+    echo ""
+    ./scripts/git.sh || exit_with_error
+    echo ""
 
-# Convert the choice to uppercase
-brew_choice=$(echo "$brew_choice" | tr '[:lower:]' '[:upper:]')
+    # Ask if Homebrew should be installed
+    read -p "Would you like to install ${MAGENTA}Homebrew${NC}? (Y/N): " brew_choice
 
-# Check the user's choice
-if [ "$brew_choice" == "Y" ]; then
-    # Check if running on ARM processor
-    if [ "$(uname -p)" = "aarch64" ] || [ "$(uname -p)" = "arm64" ]; then
-        echo "${YELLOW}ARM processor detected. Homebrew is not supported on ARM architecture.${NC}"
+    # Convert the choice to uppercase
+    brew_choice=$(echo "$brew_choice" | tr '[:lower:]' '[:upper:]')
+
+    # Check the user's choice
+    if [ "$brew_choice" == "Y" ]; then
+        # Check if running on ARM processor
+        if [ "$(uname -p)" = "aarch64" ] || [ "$(uname -p)" = "arm64" ]; then
+            echo "${YELLOW}ARM processor detected. Homebrew is not supported on ARM architecture.${NC}"
+            echo "${GREEN}Skipping Homebrew installation${NC}"
+        else
+            echo "${GREEN}Installing Homebrew...${NC}"
+            /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" || exit_with_error
+        fi
+    elif [ "$brew_choice" == "N" ]; then
         echo "${GREEN}Skipping Homebrew installation${NC}"
     else
-        echo "${GREEN}Installing Homebrew...${NC}"
-        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" || exit_with_error
+        exit_with_error
     fi
-elif [ "$brew_choice" == "N" ]; then
-    echo "${GREEN}Skipping Homebrew installation${NC}"
-else
-    exit_with_error
-fi
 
-./scripts/newsboat.sh || exit_with_error
-echo ""
-./scripts/rainbow.sh "Customization Complete" || exit_with_error
+    ./scripts/newsboat.sh || exit_with_error
+    echo ""
+    ./scripts/rainbow.sh "Customization Complete" || exit_with_error
+else
+    # Server mode - skip tools, homebrew, and newsboat
+    echo "${GREEN}Server mode: Skipping tools, homebrew, and newsboat installation${NC}"
+    ./scripts/rainbow.sh "Server Setup Complete" || exit_with_error
+fi
 
 echo "${YELLOW}Remember to go over the checklist in the README.md file${NC}"
 echo "${CYAN}You should probably restart your terminal now to avoid bugs${NC}"
