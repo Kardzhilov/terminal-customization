@@ -11,7 +11,7 @@ exit_with_error() {
 
 # Check for server flag
 SERVER_MODE=false
-if [ "$1" == "server" ]; then
+if [ "$1" == "server" ] || [ "$1" == "--server" ] || [ "$1" == "-server" ]; then
     SERVER_MODE=true
     echo "${GREEN}Running in server mode - minimal setup${NC}"
     choice="Y"
@@ -35,9 +35,17 @@ fi
 # Update the apt package list before installing new packages
 sudo apt-get update
 
-./scripts/zsh.sh || exit_with_error
+if [ "$SERVER_MODE" = true ]; then
+    ./scripts/zsh.sh server || exit_with_error
+else
+    ./scripts/zsh.sh || exit_with_error
+fi
 echo "" # Add a new line for legibility
-./scripts/starship.sh || exit_with_error
+if [ "$SERVER_MODE" = true ]; then
+    ./scripts/starship.sh server || exit_with_error
+else
+    ./scripts/starship.sh || exit_with_error
+fi
 echo ""
 
 if [ "$SERVER_MODE" = false ]; then

@@ -3,6 +3,12 @@
 # Source the colors file
 source ./scripts/colours.sh
 
+# Check for server flag
+SERVER_MODE=false
+if [ "$1" == "server" ] || [ "$1" == "--server" ] || [ "$1" == "-server" ]; then
+    SERVER_MODE=true
+fi
+
 echo "${GREEN}Starting ZSH setup${NC}"
 
 # Install zsh if not installed
@@ -81,7 +87,13 @@ add_alias_block() {
 }
 
 # Prompt the user for choice and add aliases based on the choice
-read -p "${CYAN}Do you want full aliases or just basic aliases? (full/basic): ${NC}" choice
+if [ "$SERVER_MODE" = true ]; then
+    echo "${GREEN}Server mode: Installing full aliases${NC}"
+    choice="full"
+else
+    read -p "${CYAN}Do you want full aliases or just basic aliases? (full/basic): ${NC}" choice
+fi
+
 if [ "$choice" = "full" ]; then
     clear_alias_block
     add_alias_block "alias/general"

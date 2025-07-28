@@ -3,7 +3,15 @@
 # Source the colors file
 source ./scripts/colours.sh
 
-read -p "Would you like to install and setup ${MAGENTA}Starship Shell Prompt${NC}? (Y/N): " choice
+# Check for server flag
+SERVER_MODE=false
+if [ "$1" == "server" ] || [ "$1" == "--server" ] || [ "$1" == "-server" ]; then
+    SERVER_MODE=true
+    echo "${GREEN}Server mode: Installing Starship automatically${NC}"
+    choice="Y"
+else
+    read -p "Would you like to install and setup ${MAGENTA}Starship Shell Prompt${NC}? (Y/N): " choice
+fi
 
 # Convert the choice to uppercase
 choice=$(echo "$choice" | tr '[:lower:]' '[:upper:]')
