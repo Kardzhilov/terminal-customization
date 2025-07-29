@@ -88,7 +88,7 @@ fi
 echo "${YELLOW}Remember to go over the checklist in the README.md file${NC}"
 echo "${CYAN}You should probably restart your terminal now to avoid bugs${NC}"
 
-# Start zsh if it is installed
-if command -v zsh &>/dev/null; then
+# Start zsh if it is installed (but not in server mode to avoid breaking parent scripts)
+if [ "$SERVER_MODE" = false ] && command -v zsh &>/dev/null; then
     exec zsh -l
 fi
