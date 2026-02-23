@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Change to the linux directory so all relative paths in sub-scripts work
+cd "$(dirname "${BASH_SOURCE[0]}")/linux" || exit 1
+
 # Source the colors file
 source ./scripts/colours.sh
 
