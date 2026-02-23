@@ -69,7 +69,12 @@ Write-Host ""
 & (Join-Path $ScriptsDir "psreadline.ps1") -RepoRoot $RepoRoot
 if ($LASTEXITCODE -and $LASTEXITCODE -ne 0) { Exit-WithError "PSReadLine configuration failed." }
 
-# ── Step 4: Install Profile & Aliases ──
+# ── Step 4: Install Tools (zoxide, fzf, PSFzf) ──
+Write-Host ""
+& (Join-Path $ScriptsDir "tools.ps1") -RepoRoot $RepoRoot
+if ($LASTEXITCODE -and $LASTEXITCODE -ne 0) { Exit-WithError "Tools installation failed." }
+
+# ── Step 5: Install Profile & Aliases ──
 Write-Host ""
 & (Join-Path $ScriptsDir "profile.ps1") -RepoRoot $RepoRoot
 if ($LASTEXITCODE -and $LASTEXITCODE -ne 0) { Exit-WithError "Profile installation failed." }

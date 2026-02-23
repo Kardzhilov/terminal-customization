@@ -60,7 +60,10 @@ powershell -ExecutionPolicy Bypass -File .\start-windows.ps1
    - Syntax highlighting with Gruvbox colours (like zsh-syntax-highlighting)
    - ListView prediction view for interactive completions
    - Tab completion menu, arrow-key history search
-5. **Installs a PowerShell profile** with aliases and all configurations
+5. **Installs zoxide** — smart `cd` that learns your most-used directories (`z foo`, `zi` for interactive)
+6. **Installs fzf + PSFzf** — fuzzy finder with `Ctrl+T` (files), `Ctrl+R` (history), `Alt+C` (cd)
+   - Uses **Scoop** as the primary package manager (installs it if not present), winget as fallback
+7. **Installs a PowerShell profile** with aliases and all configurations
 
 ### Repository structure
 ```
@@ -80,6 +83,7 @@ windows/
         fonts.ps1               # Font installation
         starship.ps1            # Starship installation & config
         psreadline.ps1          # PSReadLine setup
+        tools.ps1               # zoxide, fzf, PSFzf installation
         profile.ps1             # Profile installation
     profile/
         Microsoft.PowerShell_profile.ps1  # The profile loaded on every pwsh session

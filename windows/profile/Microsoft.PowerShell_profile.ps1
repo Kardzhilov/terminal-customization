@@ -1,17 +1,52 @@
 # ╔══════════════════════════════════════════════════════════════════╗
 # ║  PowerShell 7+ Profile — Terminal Customization                 ║
-# ║  Starship prompt · PSReadLine autosuggestions & highlighting    ║
+# ║  Starship · PSReadLine · zoxide · PSFzf                          ║
 # ╚══════════════════════════════════════════════════════════════════╝
 
-# ── Starship Prompt ──────────────────────────────────────────────
-if (Get-Command starship -ErrorAction SilentlyContinue) {
-    Invoke-Expression (&starship init powershell)
+# ── Cached init helper ───────────────────────────────────────────
+# Runs $Command and caches stdout to $CacheFile.
+# Re-generates only when the tool's version string changes.
+function Import-CachedInit {
+    param(
+        [string]$Command,
+        [string[]]$Arguments,
+        [string]$CacheFile,
+        [string]$VersionCommand   # command to get version string (to detect upgrades)
+    )
+    if (-not (Get-Command $Command -ErrorAction SilentlyContinue)) { return }
+
+    $cacheDir = Split-Path $CacheFile
+    if (-not (Test-Path $cacheDir)) { New-Item -ItemType Directory -Path $cacheDir -Force | Out-Null }
+
+    $versionFile = "$CacheFile.ver"
+    $currentVersion = & $Command $VersionCommand 2>&1 | Select-Object -First 1
+
+    $needsRegen = (-not (Test-Path $CacheFile)) -or
+                  (-not (Test-Path $versionFile)) -or
+                  ((Get-Content $versionFile -Raw) -ne $currentVersion)
+
+    if ($needsRegen) {
+        & $Command @Arguments | Set-Content $CacheFile
+        Set-Content $versionFile $currentVersion
+    }
+
+    . $CacheFile
 }
 
-# ── PSReadLine — zsh-like Autosuggestions & Syntax Highlighting ──
-if (Get-Module -ListAvailable -Name PSReadLine) {
-    Import-Module PSReadLine
+$cacheDir = Join-Path $env:LOCALAPPDATA "powershell-profile-cache"
 
+# ── Starship Prompt ──────────────────────────────────────────────
+$env:STARSHIP_CONFIG = Join-Path $env:USERPROFILE ".config" "starship.toml"
+Import-CachedInit -Command "starship" `
+    -Arguments @("init", "powershell", "--print-full-init") `
+    -CacheFile (Join-Path $cacheDir "starship.ps1") `
+    -VersionCommand "--version"
+
+# ── PSReadLine — zsh-like Autosuggestions & Syntax Highlighting ──
+# PSReadLine is built into PS7 — import directly, no ListAvailable scan needed
+Import-Module PSReadLine -ErrorAction SilentlyContinue
+
+if (Get-Module PSReadLine) {
     # Prediction / Autosuggestions (like zsh-autosuggestions)
     Set-PSReadLineOption -PredictionSource HistoryAndPlugin
     Set-PSReadLineOption -PredictionViewStyle ListView
@@ -55,7 +90,6 @@ if (Get-Module -ListAvailable -Name PSReadLine) {
         $line = $null
         $cursor = $null
         [Microsoft.PowerShell.PSConsoleReadLine]::GetBufferState([ref]$line, [ref]$cursor)
-
         if ($cursor -lt $line.Length) {
             [Microsoft.PowerShell.PSConsoleReadLine]::ForwardChar($key, $arg)
         } else {
@@ -64,37 +98,49 @@ if (Get-Module -ListAvailable -Name PSReadLine) {
     }
 }
 
-# ── Aliases (Windows equivalents of the Linux aliases) ──────────
-# Navigation
+# ── Zoxide — smart cd (learns your most-used dirs) ───────────────
+# 'z foo'   — jump to best match · 'zi foo' — interactive pick · 'z -' — previous dir
+Import-CachedInit -Command "zoxide" `
+    -Arguments @("init", "powershell") `
+    -CacheFile (Join-Path $cacheDir "zoxide.ps1") `
+    -VersionCommand "--version"
+
+# ── PSFzf — fuzzy finder (lazy-loaded on first use) ──────────────
+# Ctrl+T: file search · Ctrl+R: history · Alt+C: cd · Alt+A: history insert
+if (Get-Command fzf -ErrorAction SilentlyContinue) {
+    # Stub key handlers that load PSFzf on first use instead of at startup
+    function _Load-PSFzf {
+        if (-not (Get-Module PSFzf)) {
+            Import-Module PSFzf -ErrorAction SilentlyContinue
+            if (Get-Module PSFzf) {
+                Set-PsFzfOption -PSReadlineChordProvider     'Ctrl+t'
+                Set-PsFzfOption -PSReadlineChordReverseHistory 'Ctrl+r'
+                Set-PSReadLineKeyHandler -Chord 'Alt+c' -ScriptBlock { Invoke-FuzzySetLocation }
+                Set-PSReadLineKeyHandler -Chord 'Alt+a' -ScriptBlock { Invoke-FuzzyHistory }
+            }
+        }
+    }
+    Set-PSReadLineKeyHandler -Chord 'Ctrl+t' -ScriptBlock { _Load-PSFzf; Invoke-FzfPipelineInput }
+    Set-PSReadLineKeyHandler -Chord 'Ctrl+r' -ScriptBlock { _Load-PSFzf; Invoke-FuzzyHistory }
+    Set-PSReadLineKeyHandler -Chord 'Alt+c'  -ScriptBlock { _Load-PSFzf; Invoke-FuzzySetLocation }
+    Set-PSReadLineKeyHandler -Chord 'Alt+a'  -ScriptBlock { _Load-PSFzf; Invoke-FuzzyHistory }
+}
+
+# ── Aliases ──────────────────────────────────────────────────────
 Set-Alias -Name ll -Value Get-ChildItem -Option AllScope
 function .. { Set-Location .. }
 function ... { Set-Location ..\.. }
 function .... { Set-Location ..\..\.. }
 function ..... { Set-Location ..\..\..\.. }
-
-# ls with colours (PowerShell already colours Get-ChildItem output)
 function l { Get-ChildItem -Force @args }
 function la { Get-ChildItem -Force @args }
-
-# Quick edit
 function which($command) { Get-Command $command -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Path }
-
-# Git pull all repos in current directory
 function pullall {
     Get-ChildItem -Directory | ForEach-Object {
         Write-Host "Pulling $($_.Name)..." -ForegroundColor Cyan
         git -C $_.FullName pull
     }
 }
-
-# Update (winget upgrade)
 function update { winget upgrade --all --include-unknown }
-
-# Clear with alias
-Set-Alias -Name cls -Value Clear-Host -Option AllScope
-
-# Open explorer in current directory
 function e. { explorer.exe . }
-
-# ── Environment ──────────────────────────────────────────────────
-$env:STARSHIP_CONFIG = Join-Path $env:USERPROFILE ".config" "starship.toml"
+Set-Alias -Name cls -Value Clear-Host -Option AllScope
