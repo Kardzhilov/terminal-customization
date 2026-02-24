@@ -143,4 +143,5 @@ function pullall {
 }
 function update { winget upgrade --all --include-unknown }
 function e. { explorer.exe . }
+function c { code . }
 Set-Alias -Name cls -Value Clear-Host -Option AllScope
