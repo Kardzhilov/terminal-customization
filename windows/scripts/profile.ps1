@@ -65,5 +65,19 @@ $finalContent = $baseContent + $separator + $blockStart + "`n" + $newBlock + "`n
 Set-Content -Path $destProfile -Value $finalContent -NoNewline
 Write-Green "Profile written to: $destProfile"
 
+# ── Copy profile-modules alongside the profile ──
+$sourceModules = Join-Path $RepoRoot "windows" "profile" "profile-modules"
+$destModules   = Join-Path $profileDir "profile-modules"
+
+if (Test-Path $sourceModules) {
+    if (Test-Path $destModules) {
+        Remove-Item $destModules -Recurse -Force
+    }
+    Copy-Item -Path $sourceModules -Destination $destModules -Recurse -Force
+    Write-Green "Profile modules copied to: $destModules"
+} else {
+    Write-Red "Profile modules directory not found: $sourceModules"
+}
+
 Write-Green "PowerShell profile installation complete."
 Write-Yellow "Profile location: $destProfile"

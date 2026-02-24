@@ -86,7 +86,17 @@ windows/
         tools.ps1               # zoxide, fzf, PSFzf installation
         profile.ps1             # Profile installation
     profile/
-        Microsoft.PowerShell_profile.ps1  # The profile loaded on every pwsh session
+        Microsoft.PowerShell_profile.ps1  # Thin loader — sources modules below
+        profile-modules/                  # Each module checks its own dependencies
+            core.ps1                      # Import-CachedInit helper + cache dir
+            starship.ps1                  # Starship prompt (needs: starship)
+            psreadline.ps1                # PSReadLine config (needs: PSReadLine)
+            zoxide.ps1                    # Smart cd (needs: zoxide)
+            fzf.ps1                       # Fuzzy finder (needs: fzf)
+            aliases.ps1                   # General aliases & navigation
+            git.ps1                       # Git helpers (needs: git)
+            vscode.ps1                    # VS Code shortcut (needs: code)
+            visualstudio.ps1              # Visual Studio launcher (needs: VS)
 ```
 
 ---
