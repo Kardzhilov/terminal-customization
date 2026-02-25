@@ -167,6 +167,12 @@ if ! grep -Fxq 'source $ZSH/oh-my-zsh.sh' ~/.zshrc; then
     echo 'source $ZSH/oh-my-zsh.sh' >> ~/.zshrc
 fi
 
+# Add zoxide init to .zshrc (needs to be after oh-my-zsh source)
+if ! grep -q 'zoxide init zsh' ~/.zshrc; then
+    echo "${YELLOW}Adding zoxide init to .zshrc...${NC}"
+    echo 'eval "$(zoxide init zsh)"' >> ~/.zshrc
+fi
+
 # Set Zsh as the default shell
 echo "${CYAN}Setting Zsh as the default shell...${NC}"
 chsh -s $(which zsh)

@@ -1,3 +1,4 @@
 alias c='batcat -n'
 alias ca='batcat -n --paging=never'
 alias cprint='batcat -p --paging=never'
+alias z='zi'

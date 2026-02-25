@@ -24,4 +24,14 @@ if ! command -v batman &>/dev/null; then
     sudo apt-get install -y bat
 fi
 
+if ! command -v fzf &>/dev/null; then
+    echo "${GREEN}Starting fzf setup${NC}"
+    sudo apt-get install -y fzf
+fi
+
+if ! command -v zoxide &>/dev/null; then
+    echo "${GREEN}Starting zoxide setup${NC}"
+    curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
+fi
+
 echo "${GREEN}Tools setup complete${NC}"
