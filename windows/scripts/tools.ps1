@@ -17,7 +17,7 @@ function Write-Green   { param([string]$Text) Write-Host $Text -ForegroundColor 
 function Write-Yellow  { param([string]$Text) Write-Host $Text -ForegroundColor Yellow }
 function Write-Red     { param([string]$Text) Write-Host $Text -ForegroundColor Red }
 
-Write-Cyan "── Tools Installation (zoxide · fzf · PSFzf) ──"
+Write-Cyan "── Tools Installation (zoxide · fzf · gh · PSFzf) ──"
 
 # ── User-local bin dir (no admin needed) ──────────────────────
 $userBin = Join-Path $env:USERPROFILE ".local\bin"
@@ -171,105 +171,20 @@ Install-Tool -Name "fzf" `
     -GithubAssetPattern "fzf-.*-windows_amd64\.zip$" `
     -GithubExeName "fzf.exe"
 
-# ── PSFzf — PowerShell fzf integration ────────────────────────
-$psfzf = Get-Module -ListAvailable -Name PSFzf | Sort-Object Version -Descending | Select-Object -First 1
-
-if (-not $psfzf) {
-    Write-Yellow "  Installing PSFzf module..."
-    Install-Module -Name PSFzf -Force -SkipPublisherCheck -Scope CurrentUser
-    Write-Green "  PSFzf installed."
+# ── GitHub CLI (gh) ───────────────────────────────────────────
+$ghAssetPattern = if ($env:PROCESSOR_ARCHITECTURE -eq 'ARM64') {
+    "gh_.*_windows_arm64\.zip$"
 } else {
-    Write-Green "  PSFzf $($psfzf.Version) already installed."
+    "gh_.*_windows_amd64\.zip$"
 }
 
-Write-Green "Tools setup complete."
-exit 0
-
-param(
-    [Parameter(Mandatory)]
-    [string]$RepoRoot
-)
-
-$ErrorActionPreference = "Stop"
-
-function Write-Cyan    { param([string]$Text) Write-Host $Text -ForegroundColor Cyan }
-function Write-Green   { param([string]$Text) Write-Host $Text -ForegroundColor Green }
-function Write-Yellow  { param([string]$Text) Write-Host $Text -ForegroundColor Yellow }
-function Write-Red     { param([string]$Text) Write-Host $Text -ForegroundColor Red }
-
-Write-Cyan "── Tools Installation (zoxide · fzf · PSFzf) ──"
-
-# ── Ensure Scoop is available ──────────────────────────────────
-function Test-Scoop { return [bool](Get-Command scoop -ErrorAction SilentlyContinue) }
-
-if (-not (Test-Scoop)) {
-    Write-Yellow "  Scoop not found. Installing Scoop..."
-    try {
-        # Scoop requires execution policy to allow remote scripts for current user
-        Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
-        Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
-        # Refresh PATH
-        $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" +
-                    [System.Environment]::GetEnvironmentVariable("Path", "User")
-        if (Test-Scoop) {
-            Write-Green "  Scoop installed."
-        } else {
-            throw "Scoop not on PATH after install."
-        }
-    } catch {
-        Write-Red "  Failed to install Scoop: $($_.Exception.Message)"
-    }
-}
-
-# ── Helper: install a tool via Scoop, fall back to winget ──────
-function Install-Tool {
-    param(
-        [string]$Name,
-        [string]$ScoopName,
-        [string]$WingetId,
-        [string]$Command
-    )
-
-    if (Get-Command $Command -ErrorAction SilentlyContinue) {
-        Write-Green "  $Name already installed."
-        return
-    }
-
-    # Try Scoop first
-    if (Test-Scoop) {
-        Write-Yellow "  Installing $Name via Scoop..."
-        scoop install $ScoopName 2>&1 | Out-Null
-        # Refresh PATH after scoop install
-        $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" +
-                    [System.Environment]::GetEnvironmentVariable("Path", "User") + ";" +
-                    (Join-Path $env:USERPROFILE "scoop\shims")
-        if (Get-Command $Command -ErrorAction SilentlyContinue) {
-            Write-Green "  $Name installed via Scoop."
-            return
-        }
-        Write-Yellow "  Scoop install of $Name failed, trying winget..."
-    }
-
-    # Fallback to winget
-    if (Get-Command winget -ErrorAction SilentlyContinue) {
-        Write-Yellow "  Installing $Name via winget..."
-        winget install --id $WingetId --source winget --accept-source-agreements --accept-package-agreements 2>&1 | Out-Null
-        $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" +
-                    [System.Environment]::GetEnvironmentVariable("Path", "User")
-        if (Get-Command $Command -ErrorAction SilentlyContinue) {
-            Write-Green "  $Name installed via winget."
-            return
-        }
-    }
-
-    Write-Red "  Could not install $Name — please install it manually."
-}
-
-# ── zoxide — smart directory jumping ──────────────────────────
-Install-Tool -Name "zoxide" -ScoopName "zoxide" -WingetId "ajeetdsouza.zoxide" -Command "zoxide"
-
-# ── fzf — fuzzy finder (required by PSFzf) ────────────────────
-Install-Tool -Name "fzf" -ScoopName "fzf" -WingetId "junegunn.fzf" -Command "fzf"
+Install-Tool -Name "GitHub CLI" `
+    -ScoopName "gh" `
+    -WingetId "GitHub.cli" `
+    -Command "gh" `
+    -GithubRepo "cli/cli" `
+    -GithubAssetPattern $ghAssetPattern `
+    -GithubExeName "gh.exe"
 
 # ── PSFzf — PowerShell fzf integration ────────────────────────
 $psfzf = Get-Module -ListAvailable -Name PSFzf | Sort-Object Version -Descending | Select-Object -First 1

@@ -40,27 +40,62 @@ try {
 
 if (-not $starshipInstalled) {
     Write-Yellow "Installing Starship via winget..."
+    # Reset sources first to mitigate common source index corruption (0x8a15000f)
+    winget source reset --force 2>&1 | Out-Null
     winget install --id Starship.Starship --source winget --accept-source-agreements --accept-package-agreements
     if ($LASTEXITCODE -ne 0) {
+        Write-Yellow "winget install failed. Retrying after source reset..."
+        winget source reset --force 2>&1 | Out-Null
+        winget install --id Starship.Starship --source winget --accept-source-agreements --accept-package-agreements
+    }
+    if ($LASTEXITCODE -ne 0) {
         Write-Red "winget install failed. Trying direct installer..."
-        # Fallback: use the official install script
-        $installerUrl = "https://starship.rs/install.sh"
-        Write-Yellow "Attempting install via official installer..."
+        Write-Yellow "Attempting install via GitHub release asset..."
         try {
-            # Use the Windows MSI installer from GitHub
+            # Download the architecture-specific Windows ZIP and install starship.exe.
             $releaseApiUrl = "https://api.github.com/repos/starship/starship/releases/latest"
-            $release = Invoke-RestMethod -Uri $releaseApiUrl -UseBasicParsing
-            $arch = if ($env:PROCESSOR_ARCHITECTURE -eq 'ARM64') { 'arm64' } else { 'x64' }
-            $asset = $release.assets | Where-Object { $_.name -match "win-$arch\.msi$" } | Select-Object -First 1
-            if ($asset) {
-                $msiPath = Join-Path $env:TEMP "starship-installer.msi"
-                Write-Yellow "Downloading Starship MSI..."
-                Invoke-WebRequest -Uri $asset.browser_download_url -OutFile $msiPath -UseBasicParsing
-                Write-Yellow "Installing Starship MSI..."
-                Start-Process msiexec.exe -ArgumentList "/i `"$msiPath`" /qn" -Wait -NoNewWindow
-                Remove-Item $msiPath -Force -ErrorAction SilentlyContinue
+            $release = Invoke-RestMethod -Uri $releaseApiUrl -UseBasicParsing -ErrorAction Stop
+            $targetArch = if ([Environment]::Is64BitOperatingSystem) {
+                if ($env:PROCESSOR_ARCHITECTURE -eq 'ARM64') { 'aarch64' } else { 'x86_64' }
             } else {
-                throw "Could not find Starship MSI in latest release."
+                'i686'
+            }
+
+            $assetPattern = "^starship-$targetArch-pc-windows-msvc\.zip$"
+            $asset = $release.assets | Where-Object { $_.name -match $assetPattern } | Select-Object -First 1
+            if ($asset) {
+                $zipPath = Join-Path $env:TEMP "starship-$targetArch.zip"
+                $extractDir = Join-Path $env:TEMP "starship-$targetArch"
+                $installDir = Join-Path $env:ProgramFiles "starship\bin"
+                $installExe = Join-Path $installDir "starship.exe"
+
+                Write-Yellow "Downloading $($asset.name)..."
+                Invoke-WebRequest -Uri $asset.browser_download_url -OutFile $zipPath -UseBasicParsing -ErrorAction Stop
+
+                if (Test-Path $extractDir) {
+                    Remove-Item -Path $extractDir -Recurse -Force -ErrorAction SilentlyContinue
+                }
+                Expand-Archive -Path $zipPath -DestinationPath $extractDir -Force
+
+                $downloadedExe = Get-ChildItem -Path $extractDir -Filter "starship.exe" -Recurse -ErrorAction Stop | Select-Object -First 1
+                if (-not $downloadedExe) {
+                    throw "Downloaded Starship archive does not contain starship.exe"
+                }
+
+                New-Item -ItemType Directory -Path $installDir -Force | Out-Null
+                Copy-Item -Path $downloadedExe.FullName -Destination $installExe -Force
+
+                # Ensure install dir is on machine PATH for future sessions.
+                $machinePath = [Environment]::GetEnvironmentVariable("Path", "Machine")
+                if ($machinePath -notlike "*$installDir*") {
+                    [Environment]::SetEnvironmentVariable("Path", "$machinePath;$installDir", "Machine")
+                }
+
+                Remove-Item -Path $zipPath -Force -ErrorAction SilentlyContinue
+                Remove-Item -Path $extractDir -Recurse -Force -ErrorAction SilentlyContinue
+                Write-Green "Starship installed from GitHub release: $installExe"
+            } else {
+                throw "Could not find Starship Windows ZIP asset for architecture '$targetArch' in latest release."
             }
         } catch {
             Write-Red "Failed to install Starship: $($_.Exception.Message)"

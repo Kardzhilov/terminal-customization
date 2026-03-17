@@ -63,7 +63,8 @@ powershell -ExecutionPolicy Bypass -File .\start-windows.ps1
 5. **Installs zoxide** — smart `cd` that learns your most-used directories (`z foo`, `zi` for interactive)
 6. **Installs fzf + PSFzf** — fuzzy finder with `Ctrl+T` (files), `Ctrl+R` (history), `Alt+C` (cd)
    - Uses **Scoop** as the primary package manager (installs it if not present), winget as fallback
-7. **Installs a PowerShell profile** with aliases and all configurations
+7. **Installs GitHub CLI (`gh`)** for GitHub workflows from terminal
+8. **Installs a PowerShell profile** with aliases and all configurations
 
 ### Repository structure
 ```
@@ -83,7 +84,7 @@ windows/
         fonts.ps1               # Font installation
         starship.ps1            # Starship installation & config
         psreadline.ps1          # PSReadLine setup
-        tools.ps1               # zoxide, fzf, PSFzf installation
+        tools.ps1               # zoxide, fzf, gh, PSFzf installation
         profile.ps1             # Profile installation
     profile/
         Microsoft.PowerShell_profile.ps1  # Thin loader — sources modules below
